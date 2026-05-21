@@ -1,0 +1,65 @@
+services:
+  lms-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lms-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourPassword123!", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  lms-db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lms-db-init
+    depends_on:
+      lms-db:
+        condition: service_healthy
+    volumes:
+      - ./PRN232LmsDb.sql:/PRN232LmsDb.sql
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo "Checking if database PRN232LmsDb exists..."
+        # Query to check database existence
+        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S lms-db -U sa -P "YourPassword123!" -C -h -1 -Q "SET NOCOUNT ON; SELECT DB_ID('PRN232LmsDb')")
+        
+        # Clean up whitespace/newline
+        DB_EXISTS=$$(echo $$DB_EXISTS | tr -d '\r\n ')
+        
+        if [ -z "$$DB_EXISTS" ] || [ "$$DB_EXISTS" = "NULL" ]; then
+          echo "Database 'PRN232LmsDb' does not exist. Creating and seeding..."
+          /opt/mssql-tools18/bin/sqlcmd -S lms-db -U sa -P "YourPassword123!" -C -i /PRN232LmsDb.sql
+          echo "Database initialized successfully!"
+        else
+          echo "Database 'PRN232LmsDb' already exists. Skipping initialization."
+        fi
+
+  lms-api:
+    image: lms-api
+    build:
+      context: .
+      dockerfile: PRN232.LmsSystem.API/Dockerfile
+    container_name: lms-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__LmsDb=Server=lms-db;Database=PRN232LmsDb;User Id=sa;Password=YourPassword123!;MultipleActiveResultSets=true;TrustServerCertificate=True;Encrypt=False
+    depends_on:
+      lms-db:
+        condition: service_healthy
+      lms-db-init:
+        condition: service_completed_successfully
+
+volumes:
+  mssql-data:
