@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN232.LmsSystem.Repositories.Entities;
 using PRN232.LmsSystem.Repositories.Repositories;
+using PRN232.LmsSystem.Services.Extensions;
 using PRN232.LmsSystem.Services.Models;
 
 namespace PRN232.LmsSystem.Services.Services;
@@ -26,7 +27,7 @@ public class SemesterService : ISemesterService
 
         if (!string.IsNullOrWhiteSpace(query.Sort))
         {
-            semestersQuery = ApplySorting(semestersQuery, query.Sort);
+            semestersQuery = semestersQuery.ApplySort(query.Sort);
         }
 
         var totalItems = await semestersQuery.CountAsync();
@@ -86,46 +87,7 @@ public class SemesterService : ISemesterService
         return _repository.DeleteAsync(id);
     }
 
-    private static IQueryable<Semester> ApplySorting(IQueryable<Semester> query, string sort)
-    {
-        var sortFields = sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        IOrderedQueryable<Semester>? ordered = null;
 
-        foreach (var field in sortFields)
-        {
-            var descending = field.StartsWith('-');
-            var name = descending ? field[1..] : field;
-
-            ordered = name.ToLowerInvariant() switch
-            {
-                "semestername" => ApplyOrder(query, ordered, s => s.SemesterName, descending),
-                "startdate" => ApplyOrder(query, ordered, s => s.StartDate, descending),
-                "enddate" => ApplyOrder(query, ordered, s => s.EndDate, descending),
-                _ => ordered
-            };
-
-            if (ordered is not null)
-            {
-                query = ordered;
-            }
-        }
-
-        return ordered ?? query;
-    }
-
-    private static IOrderedQueryable<Semester> ApplyOrder<TKey>(
-        IQueryable<Semester> source,
-        IOrderedQueryable<Semester>? ordered,
-        System.Linq.Expressions.Expression<Func<Semester, TKey>> keySelector,
-        bool descending)
-    {
-        if (ordered is null)
-        {
-            return descending ? source.OrderByDescending(keySelector) : source.OrderBy(keySelector);
-        }
-
-        return descending ? ordered.ThenByDescending(keySelector) : ordered.ThenBy(keySelector);
-    }
 
     private static SemesterModel MapToModel(Semester semester)
     {

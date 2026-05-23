@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN232.LmsSystem.Repositories.Entities;
 using PRN232.LmsSystem.Repositories.Repositories;
+using PRN232.LmsSystem.Services.Extensions;
 using PRN232.LmsSystem.Services.Models;
 
 namespace PRN232.LmsSystem.Services.Services;
@@ -31,7 +32,7 @@ public class EnrollmentService : IEnrollmentService
 
         if (!string.IsNullOrWhiteSpace(query.Sort))
         {
-            enrollmentsQuery = ApplySorting(enrollmentsQuery, query.Sort);
+            enrollmentsQuery = enrollmentsQuery.ApplySort(query.Sort);
         }
 
         var totalItems = await enrollmentsQuery.CountAsync();
@@ -93,47 +94,7 @@ public class EnrollmentService : IEnrollmentService
         return _repository.DeleteAsync(id);
     }
 
-    private static IQueryable<Enrollment> ApplySorting(IQueryable<Enrollment> query, string sort)
-    {
-        var sortFields = sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        IOrderedQueryable<Enrollment>? ordered = null;
 
-        foreach (var field in sortFields)
-        {
-            var descending = field.StartsWith('-');
-            var name = descending ? field[1..] : field;
-
-            ordered = name.ToLowerInvariant() switch
-            {
-                "status" => ApplyOrder(query, ordered, e => e.Status, descending),
-                "enrolldate" => ApplyOrder(query, ordered, e => e.EnrollDate, descending),
-                "studentid" => ApplyOrder(query, ordered, e => e.StudentId, descending),
-                "courseid" => ApplyOrder(query, ordered, e => e.CourseId, descending),
-                _ => ordered
-            };
-
-            if (ordered is not null)
-            {
-                query = ordered;
-            }
-        }
-
-        return ordered ?? query;
-    }
-
-    private static IOrderedQueryable<Enrollment> ApplyOrder<TKey>(
-        IQueryable<Enrollment> source,
-        IOrderedQueryable<Enrollment>? ordered,
-        System.Linq.Expressions.Expression<Func<Enrollment, TKey>> keySelector,
-        bool descending)
-    {
-        if (ordered is null)
-        {
-            return descending ? source.OrderByDescending(keySelector) : source.OrderBy(keySelector);
-        }
-
-        return descending ? ordered.ThenByDescending(keySelector) : ordered.ThenBy(keySelector);
-    }
 
     private static EnrollmentModel MapToModel(Enrollment enrollment)
     {

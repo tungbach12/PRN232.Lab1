@@ -185,4 +185,53 @@ public class StudentsController : ControllerBase
             Message = "Request processed successfully"
         });
     }
+
+    /// <summary>
+    /// Retrieves a paginated list of enrollments for a specific student.
+    /// </summary>
+    /// <param name="studentId">The unique ID of the student.</param>
+    /// <param name="request">The enrollment query parameters, including pagination, filtering, search, and data shaping.</param>
+    /// <returns>A paginated list of enrollments.</returns>
+    /// <response code="200">Successfully retrieved the list of enrollments.</response>
+    /// <response code="404">No student was found with the specified ID.</response>
+    [HttpGet("{studentId:int}/enrollments")]
+    [ProducesResponseType(typeof(ApiResponse<PagedResponse<object>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<PagedResponse<object>>>> GetStudentEnrollments(int studentId, [FromQuery] EnrollmentQueryRequest request)
+    {
+        var student = await _service.GetStudentByIdAsync(studentId, includeEnrollments: false);
+        if (student is null)
+        {
+            return NotFound(new ApiResponse<object>
+            {
+                Success = false,
+                Message = "Student not found",
+                Errors = new { studentId }
+            });
+        }
+
+        var result = await _service.GetEnrollmentByStudentId(studentId, EnrollmentMapper.ToQueryModel(request));
+        var responseItems = result.Items
+            .Select(model => EnrollmentMapper.ShapeResponse(EnrollmentMapper.ToResponse(model), request.Fields))
+            .ToList();
+
+        var pagedResponse = new PagedResponse<object>
+        {
+            Items = responseItems,
+            Pagination = new PaginationMetadata
+            {
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalItems = result.TotalItems,
+                TotalPages = result.TotalPages
+            }
+        };
+
+        return Ok(new ApiResponse<PagedResponse<object>>
+        {
+            Success = true,
+            Message = "Request processed successfully",
+            Data = pagedResponse
+        });
+    }
 }

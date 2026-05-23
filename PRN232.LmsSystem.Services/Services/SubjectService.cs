@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN232.LmsSystem.Repositories.Entities;
 using PRN232.LmsSystem.Repositories.Repositories;
+using PRN232.LmsSystem.Services.Extensions;
 using PRN232.LmsSystem.Services.Models;
 
 namespace PRN232.LmsSystem.Services.Services;
@@ -26,7 +27,7 @@ public class SubjectService : ISubjectService
 
         if (!string.IsNullOrWhiteSpace(query.Sort))
         {
-            subjectsQuery = ApplySorting(subjectsQuery, query.Sort);
+            subjectsQuery = subjectsQuery.ApplySort(query.Sort);
         }
 
         var totalItems = await subjectsQuery.CountAsync();
@@ -86,46 +87,7 @@ public class SubjectService : ISubjectService
         return _repository.DeleteAsync(id);
     }
 
-    private static IQueryable<Subject> ApplySorting(IQueryable<Subject> query, string sort)
-    {
-        var sortFields = sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        IOrderedQueryable<Subject>? ordered = null;
 
-        foreach (var field in sortFields)
-        {
-            var descending = field.StartsWith('-');
-            var name = descending ? field[1..] : field;
-
-            ordered = name.ToLowerInvariant() switch
-            {
-                "subjectcode" => ApplyOrder(query, ordered, s => s.SubjectCode, descending),
-                "subjectname" => ApplyOrder(query, ordered, s => s.SubjectName, descending),
-                "credit" => ApplyOrder(query, ordered, s => s.Credit, descending),
-                _ => ordered
-            };
-
-            if (ordered is not null)
-            {
-                query = ordered;
-            }
-        }
-
-        return ordered ?? query;
-    }
-
-    private static IOrderedQueryable<Subject> ApplyOrder<TKey>(
-        IQueryable<Subject> source,
-        IOrderedQueryable<Subject>? ordered,
-        System.Linq.Expressions.Expression<Func<Subject, TKey>> keySelector,
-        bool descending)
-    {
-        if (ordered is null)
-        {
-            return descending ? source.OrderByDescending(keySelector) : source.OrderBy(keySelector);
-        }
-
-        return descending ? ordered.ThenByDescending(keySelector) : ordered.ThenBy(keySelector);
-    }
 
     private static SubjectModel MapToModel(Subject subject)
     {

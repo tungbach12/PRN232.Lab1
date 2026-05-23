@@ -9,4 +9,5 @@ public interface IStudentService
     Task<StudentModel> CreateStudentAsync(StudentModel model);
     Task<bool> UpdateStudentAsync(int id, StudentModel model);
     Task<bool> DeleteStudentAsync(int id);
+    Task<PagedResult<EnrollmentModel>> GetEnrollmentByStudentId(int Id, EnrollmentQueryModel query);
 }

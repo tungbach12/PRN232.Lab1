@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN232.LmsSystem.Repositories.Entities;
 using PRN232.LmsSystem.Repositories.Repositories;
+using PRN232.LmsSystem.Services.Extensions;
 using PRN232.LmsSystem.Services.Models;
 
 namespace PRN232.LmsSystem.Services.Services;
@@ -8,12 +9,54 @@ namespace PRN232.LmsSystem.Services.Services;
 public class StudentService : IStudentService
 {
     private readonly IStudentRepository _repository;
+    private readonly IEnrollmentRepository _enrollmentRepository;
 
-    public StudentService(IStudentRepository repository)
+    public StudentService(IStudentRepository repository, IEnrollmentRepository enrollmentRepository)
     {
         _repository = repository;
+        _enrollmentRepository = enrollmentRepository;
     }
 
+    public async Task<PagedResult<EnrollmentModel>> GetEnrollmentByStudentId(int Id, EnrollmentQueryModel query)
+    {
+        var includeStudent = query.IncludeStudent;
+        var includeCourse = query.IncludeCourse;
+        var enrollmentsQuery = _enrollmentRepository.Query(includeStudent, includeCourse)
+            .Where(e => e.StudentId == Id);
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var keyword = query.Search.Trim();
+            enrollmentsQuery = enrollmentsQuery.Where(e => 
+                e.Status.Contains(keyword) || 
+                (e.Student != null && e.Student.FullName.Contains(keyword)) ||
+                (e.Course != null && e.Course.CourseName.Contains(keyword)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Sort))
+        {
+            enrollmentsQuery = enrollmentsQuery.ApplySort(query.Sort);
+        }
+
+        var totalItems = await enrollmentsQuery.CountAsync();
+        var page = query.Page < 1 ? 1 : query.Page;
+        var size = query.Size < 1 ? 10 : query.Size;
+        var totalPages = (int)Math.Ceiling(totalItems / (double)size);
+
+        var enrollments = await enrollmentsQuery
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+
+        return new PagedResult<EnrollmentModel>
+        {
+            Items = enrollments.Select(MapToEnrollmentModel).ToList(),
+            TotalItems = totalItems,
+            Page = page,
+            PageSize = size,
+            TotalPages = totalPages
+        };
+    }
     public async Task<PagedResult<StudentModel>> GetStudentsAsync(StudentQueryModel query)
     {
         var includeEnrollments = query.IncludeEnrollments;
@@ -27,7 +70,7 @@ public class StudentService : IStudentService
 
         if (!string.IsNullOrWhiteSpace(query.Sort))
         {
-            studentsQuery = ApplySorting(studentsQuery, query.Sort);
+            studentsQuery = studentsQuery.ApplySort(query.Sort);
         }
 
         var totalItems = await studentsQuery.CountAsync();
@@ -87,46 +130,7 @@ public class StudentService : IStudentService
         return _repository.DeleteAsync(id);
     }
 
-    private static IQueryable<Student> ApplySorting(IQueryable<Student> query, string sort)
-    {
-        var sortFields = sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        IOrderedQueryable<Student>? ordered = null;
 
-        foreach (var field in sortFields)
-        {
-            var descending = field.StartsWith('-');
-            var name = descending ? field[1..] : field;
-
-            ordered = name.ToLowerInvariant() switch
-            {
-                "fullname" => ApplyOrder(query, ordered, s => s.FullName, descending),
-                "email" => ApplyOrder(query, ordered, s => s.Email, descending),
-                "dateofbirth" => ApplyOrder(query, ordered, s => s.DateOfBirth, descending),
-                _ => ordered
-            };
-
-            if (ordered is not null)
-            {
-                query = ordered;
-            }
-        }
-
-        return ordered ?? query;
-    }
-
-    private static IOrderedQueryable<Student> ApplyOrder<TKey>(
-        IQueryable<Student> source,
-        IOrderedQueryable<Student>? ordered,
-        System.Linq.Expressions.Expression<Func<Student, TKey>> keySelector,
-        bool descending)
-    {
-        if (ordered is null)
-        {
-            return descending ? source.OrderByDescending(keySelector) : source.OrderBy(keySelector);
-        }
-
-        return descending ? ordered.ThenByDescending(keySelector) : ordered.ThenBy(keySelector);
-    }
 
     private static StudentModel MapToModel(Student student)
     {
@@ -152,6 +156,32 @@ public class StudentService : IStudentService
                     EnrollDate = e.EnrollDate,
                     Status = e.Status
                 }).ToList()
+        };
+    }
+
+    private static EnrollmentModel MapToEnrollmentModel(Enrollment enrollment)
+    {
+        return new EnrollmentModel
+        {
+            EnrollmentId = enrollment.EnrollmentId,
+            StudentId = enrollment.StudentId,
+            CourseId = enrollment.CourseId,
+            EnrollDate = enrollment.EnrollDate,
+            Status = enrollment.Status,
+            Student = enrollment.Student is null ? null : new StudentModel
+            {
+                StudentId = enrollment.Student.StudentId,
+                FullName = enrollment.Student.FullName,
+                Email = enrollment.Student.Email,
+                DateOfBirth = enrollment.Student.DateOfBirth
+            },
+            Course = enrollment.Course is null ? null : new CourseModel
+            {
+                CourseId = enrollment.Course.CourseId,
+                CourseName = enrollment.Course.CourseName,
+                SemesterId = enrollment.Course.SemesterId,
+                SubjectId = enrollment.Course.SubjectId
+            }
         };
     }
 }
