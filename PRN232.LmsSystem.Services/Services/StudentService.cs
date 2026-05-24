@@ -22,38 +22,33 @@ public class StudentService : IStudentService
         var includeStudent = query.IncludeStudent;
         var includeCourse = query.IncludeCourse;
         var enrollmentsQuery = _enrollmentRepository.Query(includeStudent, includeCourse)
-            .Where(e => e.StudentId == Id);
-
+                                                    .Where(s => s.StudentId == Id);
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var keyword = query.Search.Trim();
-            enrollmentsQuery = enrollmentsQuery.Where(e => 
-                e.Status.Contains(keyword) || 
+            enrollmentsQuery = enrollmentsQuery.Where(e =>
+                e.Status.Contains(keyword) ||
                 (e.Student != null && e.Student.FullName.Contains(keyword)) ||
                 (e.Course != null && e.Course.CourseName.Contains(keyword)));
         }
-
         if (!string.IsNullOrWhiteSpace(query.Sort))
         {
             enrollmentsQuery = enrollmentsQuery.ApplySort(query.Sort);
         }
-
         var totalItems = await enrollmentsQuery.CountAsync();
         var page = query.Page < 1 ? 1 : query.Page;
         var size = query.Size < 1 ? 10 : query.Size;
         var totalPages = (int)Math.Ceiling(totalItems / (double)size);
-
         var enrollments = await enrollmentsQuery
             .Skip((page - 1) * size)
             .Take(size)
             .ToListAsync();
-
         return new PagedResult<EnrollmentModel>
         {
             Items = enrollments.Select(MapToEnrollmentModel).ToList(),
-            TotalItems = totalItems,
             Page = page,
             PageSize = size,
+            TotalItems = totalItems,
             TotalPages = totalPages
         };
     }

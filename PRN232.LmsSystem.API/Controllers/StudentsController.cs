@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.ObjectPool;
 using PRN232.Lab1.Mappings;
 using PRN232.Lab1.Models.Requests;
 using PRN232.Lab1.Models.Responses;
@@ -209,11 +210,10 @@ public class StudentsController : ControllerBase
                 Errors = new { studentId }
             });
         }
-
         var result = await _service.GetEnrollmentByStudentId(studentId, EnrollmentMapper.ToQueryModel(request));
         var responseItems = result.Items
-            .Select(model => EnrollmentMapper.ShapeResponse(EnrollmentMapper.ToResponse(model), request.Fields))
-            .ToList();
+                            .Select(model => EnrollmentMapper.ShapeResponse(EnrollmentMapper.ToResponse(model), request.Fields))
+                            .ToList();
 
         var pagedResponse = new PagedResponse<object>
         {
@@ -222,8 +222,8 @@ public class StudentsController : ControllerBase
             {
                 Page = result.Page,
                 PageSize = result.PageSize,
-                TotalItems = result.TotalItems,
-                TotalPages = result.TotalPages
+                TotalPages = result.TotalPages,
+                TotalItems = result.TotalItems
             }
         };
 
