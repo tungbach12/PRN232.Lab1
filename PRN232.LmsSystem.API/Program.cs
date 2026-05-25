@@ -8,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+});
 builder.Services.AddDbContext<LmsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LmsDb")));
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -31,6 +35,8 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "API for Learning Management System (LMS) - PRN232"
     });
+
+    options.DescribeAllParametersInCamelCase();
 
     // Set the comments path for the Swagger JSON and UI.
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
