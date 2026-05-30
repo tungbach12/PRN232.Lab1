@@ -60,7 +60,7 @@ public class CourseService : ICourseService
 
     public async Task<PagedResult<CourseModel>> GetCoursesAsync(CourseQueryModel query)
     {
-        var coursesQuery = _repository.Query(query.IncludeSemester, query.IncludeSubject, query.IncludeEnrollments);
+        var coursesQuery = _repository.Query(query.IncludeSemester, query.IncludeEnrollments);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
@@ -93,9 +93,9 @@ public class CourseService : ICourseService
         };
     }
 
-    public async Task<CourseModel?> GetCourseByIdAsync(int id, bool includeSemester, bool includeSubject, bool includeEnrollments)
+    public async Task<CourseModel?> GetCourseByIdAsync(int id, bool includeSemester, bool includeEnrollments)
     {
-        var course = await _repository.GetByIdAsync(id, includeSemester, includeSubject, includeEnrollments);
+        var course = await _repository.GetByIdAsync(id, includeSemester, includeEnrollments);
         return course is null ? null : MapToModel(course);
     }
 
@@ -104,8 +104,7 @@ public class CourseService : ICourseService
         var entity = new Course
         {
             CourseName = model.CourseName,
-            SemesterId = model.SemesterId,
-            SubjectId = model.SubjectId
+            SemesterId = model.SemesterId
         };
 
         var created = await _repository.AddAsync(entity);
@@ -118,8 +117,7 @@ public class CourseService : ICourseService
         {
             CourseId = id,
             CourseName = model.CourseName,
-            SemesterId = model.SemesterId,
-            SubjectId = model.SubjectId
+            SemesterId = model.SemesterId
         };
 
         return await _repository.UpdateAsync(id, entity);
@@ -139,20 +137,12 @@ public class CourseService : ICourseService
             CourseId = course.CourseId,
             CourseName = course.CourseName,
             SemesterId = course.SemesterId,
-            SubjectId = course.SubjectId,
             Semester = course.Semester is null ? null : new SemesterModel
             {
                 SemesterId = course.Semester.SemesterId,
                 SemesterName = course.Semester.SemesterName,
                 StartDate = course.Semester.StartDate,
                 EndDate = course.Semester.EndDate
-            },
-            Subject = course.Subject is null ? null : new SubjectModel
-            {
-                SubjectId = course.Subject.SubjectId,
-                SubjectCode = course.Subject.SubjectCode,
-                SubjectName = course.Subject.SubjectName,
-                Credit = course.Subject.Credit
             },
             Enrollments = course.Enrollments.Count == 0
                 ? null
@@ -194,8 +184,7 @@ public class CourseService : ICourseService
             {
                 CourseId = enrollment.Course.CourseId,
                 CourseName = enrollment.Course.CourseName,
-                SemesterId = enrollment.Course.SemesterId,
-                SubjectId = enrollment.Course.SubjectId
+                SemesterId = enrollment.Course.SemesterId
             }
         };
     }

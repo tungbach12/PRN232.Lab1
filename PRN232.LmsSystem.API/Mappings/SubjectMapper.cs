@@ -13,15 +13,10 @@ public static class SubjectMapper
             Search = request.Search,
             Sort = request.Sort,
             Page = request.Page,
-            Size = request.Size,
-            IncludeCourses = HasExpand(request.Expand, "courses")
+            Size = request.Size
         };
     }
 
-    public static bool IncludeCourses(string? expand)
-    {
-        return HasExpand(expand, "courses");
-    }
 
     public static SubjectResponse ToResponse(SubjectModel model)
     {
@@ -30,14 +25,7 @@ public static class SubjectMapper
             SubjectId = model.SubjectId,
             SubjectCode = model.SubjectCode,
             SubjectName = model.SubjectName,
-            Credit = model.Credit,
-            Courses = model.Courses?.Select(c => new CourseResponse
-            {
-                CourseId = c.CourseId,
-                CourseName = c.CourseName,
-                SemesterId = c.SemesterId,
-                SubjectId = c.SubjectId
-            }).ToList()
+            Credit = model.Credit
         };
     }
 
@@ -74,10 +62,6 @@ public static class SubjectMapper
             shaped["credit"] = response.Credit;
         }
 
-        if (selected.Contains("courses"))
-        {
-            shaped["courses"] = response.Courses;
-        }
 
         return shaped;
     }

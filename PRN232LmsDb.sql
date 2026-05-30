@@ -60,12 +60,9 @@ CREATE TABLE [Courses] (
     [CourseId]   INT IDENTITY(1,1) NOT NULL,
     [CourseName] NVARCHAR(100) NOT NULL,
     [SemesterId] INT NOT NULL,
-    [SubjectId]  INT NOT NULL,
     CONSTRAINT [PK_Courses] PRIMARY KEY CLUSTERED ([CourseId] ASC),
     CONSTRAINT [FK_Courses_Semesters_SemesterId] FOREIGN KEY ([SemesterId]) 
-        REFERENCES [Semesters] ([SemesterId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_Courses_Subjects_SubjectId] FOREIGN KEY ([SubjectId]) 
-        REFERENCES [Subjects] ([SubjectId]) ON DELETE CASCADE
+        REFERENCES [Semesters] ([SemesterId]) ON DELETE CASCADE
 );
 GO
 
@@ -88,7 +85,6 @@ GO
 -- 3. CREATE INDEXES (Performance optimization & parity with EF Core keys)
 -- ============================================================================
 CREATE NONCLUSTERED INDEX [IX_Courses_SemesterId] ON [Courses] ([SemesterId] ASC);
-CREATE NONCLUSTERED INDEX [IX_Courses_SubjectId] ON [Courses] ([SubjectId] ASC);
 CREATE NONCLUSTERED INDEX [IX_Enrollments_CourseId] ON [Enrollments] ([CourseId] ASC);
 CREATE NONCLUSTERED INDEX [IX_Enrollments_StudentId] ON [Enrollments] ([StudentId] ASC);
 GO
@@ -161,12 +157,11 @@ WITH SeqCrse AS (
     UNION ALL
     SELECT n + 1 FROM SeqCrse WHERE n < 20
 )
-INSERT INTO [Courses] ([CourseId], [CourseName], [SemesterId], [SubjectId])
+INSERT INTO [Courses] ([CourseId], [CourseName], [SemesterId])
 SELECT 
     n,
     CONCAT('Course ', n),
-    ((n - 1) % 5) + 1,
-    ((n - 1) % 10) + 1
+    ((n - 1) % 5) + 1
 FROM SeqCrse;
 SET IDENTITY_INSERT [Courses] OFF;
 GO

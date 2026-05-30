@@ -71,7 +71,6 @@ public class CoursesController : ControllerBase
         var course = await _service.GetCourseByIdAsync(
             id,
             CourseMapper.IncludeSemester(expand),
-            CourseMapper.IncludeSubject(expand),
             CourseMapper.IncludeEnrollments(expand));
 
         if (course is null)
@@ -108,8 +107,7 @@ public class CoursesController : ControllerBase
         var created = await _service.CreateCourseAsync(new CourseModel
         {
             CourseName = request.CourseName,
-            SemesterId = request.SemesterId,
-            SubjectId = request.SubjectId
+            SemesterId = request.SemesterId
         });
 
         var response = CourseMapper.ToResponse(created);
@@ -140,8 +138,7 @@ public class CoursesController : ControllerBase
         {
             CourseId = id,
             CourseName = request.CourseName,
-            SemesterId = request.SemesterId,
-            SubjectId = request.SubjectId
+            SemesterId = request.SemesterId
         });
 
         if (!updated)
@@ -204,7 +201,7 @@ public class CoursesController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<PagedResponse<object>>>> GetCourseEnrollments(int courseId, [FromQuery] EnrollmentQueryRequest request)
     {
-        var course = await _service.GetCourseByIdAsync(courseId, includeSemester: false, includeSubject: false, includeEnrollments: false);
+        var course = await _service.GetCourseByIdAsync(courseId, includeSemester: false, includeEnrollments: false);
         if (course is null)
         {
             return NotFound(new ApiResponse<object>

@@ -116,8 +116,7 @@ public class EnrollmentService : IEnrollmentService
             {
                 CourseId = enrollment.Course.CourseId,
                 CourseName = enrollment.Course.CourseName,
-                SemesterId = enrollment.Course.SemesterId,
-                SubjectId = enrollment.Course.SubjectId
+                SemesterId = enrollment.Course.SemesterId
             }
         };
     }

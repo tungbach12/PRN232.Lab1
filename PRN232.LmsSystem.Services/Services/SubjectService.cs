@@ -17,7 +17,7 @@ public class SubjectService : ISubjectService
 
     public async Task<PagedResult<SubjectModel>> GetSubjectsAsync(SubjectQueryModel query)
     {
-        var subjectsQuery = _repository.Query(query.IncludeCourses);
+        var subjectsQuery = _repository.Query();
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
@@ -50,9 +50,9 @@ public class SubjectService : ISubjectService
         };
     }
 
-    public async Task<SubjectModel?> GetSubjectByIdAsync(int id, bool includeCourses)
+    public async Task<SubjectModel?> GetSubjectByIdAsync(int id)
     {
-        var subject = await _repository.GetByIdAsync(id, includeCourses);
+        var subject = await _repository.GetByIdAsync(id);
         return subject is null ? null : MapToModel(subject);
     }
 
@@ -96,16 +96,7 @@ public class SubjectService : ISubjectService
             SubjectId = subject.SubjectId,
             SubjectCode = subject.SubjectCode,
             SubjectName = subject.SubjectName,
-            Credit = subject.Credit,
-            Courses = subject.Courses.Count == 0
-                ? null
-                : subject.Courses.Select(c => new CourseModel
-                {
-                    CourseId = c.CourseId,
-                    CourseName = c.CourseName,
-                    SemesterId = c.SemesterId,
-                    SubjectId = c.SubjectId
-                }).ToList()
+            Credit = subject.Credit
         };
     }
 }

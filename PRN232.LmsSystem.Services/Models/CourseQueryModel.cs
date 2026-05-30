@@ -7,6 +7,5 @@ public class CourseQueryModel
     public int Page { get; set; } = 1;
     public int Size { get; set; } = 10;
     public bool IncludeSemester { get; set; }
-    public bool IncludeSubject { get; set; }
     public bool IncludeEnrollments { get; set; }
 }

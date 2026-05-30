@@ -55,10 +55,6 @@ public class LmsDbContext : DbContext
             .WithMany(s => s.Courses)
             .HasForeignKey(c => c.SemesterId);
 
-        modelBuilder.Entity<Course>()
-            .HasOne(c => c.Subject)
-            .WithMany(s => s.Courses)
-            .HasForeignKey(c => c.SubjectId);
 
         modelBuilder.Entity<Enrollment>()
             .HasOne(e => e.Student)
@@ -95,8 +91,7 @@ public class LmsDbContext : DbContext
             {
                 CourseId = i,
                 CourseName = $"Course {i}",
-                SemesterId = ((i - 1) % 5) + 1,
-                SubjectId = ((i - 1) % 10) + 1
+                SemesterId = ((i - 1) % 5) + 1
             })
             .ToArray();
 

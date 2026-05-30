@@ -43,7 +43,7 @@ public class SubjectQueryRequest
     /// <summary>
     /// Comma-separated list of properties to selectively include in the shaped JSON response (Data Shaping).
     /// Leaving it empty returns all non-navigation fields of the subject by default.
-    /// Valid shapeable fields (Case-Insensitive): subjectId, subjectCode, subjectName, credit, courses (if expanded).
+    /// Valid shapeable fields (Case-Insensitive): subjectId, subjectCode, subjectName, credit.
     /// Example: "subjectId,subjectCode,subjectName"
     /// </summary>
     /// <example>subjectId,subjectCode,subjectName</example>
@@ -51,11 +51,8 @@ public class SubjectQueryRequest
 
     /// <summary>
     /// Comma-separated list of related navigation properties or entities to expand and include in the response (Eager Loading).
-    /// Supported options (Case-Insensitive):
-    /// - "courses": Eagerly loads the list of courses associated with this subject.
-    /// Example: "courses"
+    /// Supported options (Case-Insensitive): none.
     /// </summary>
-    /// <example>courses</example>
     public string? Expand { get; set; }
 }
 

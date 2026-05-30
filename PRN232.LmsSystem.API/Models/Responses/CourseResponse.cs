@@ -21,19 +21,9 @@ public class CourseResponse
     public int SemesterId { get; set; }
 
     /// <summary>
-    /// Unique identifier for the subject.
-    /// </summary>
-    public int SubjectId { get; set; }
-
-    /// <summary>
     /// Semester details if expanded.
     /// </summary>
     public SemesterResponse? Semester { get; set; }
-
-    /// <summary>
-    /// Subject details if expanded.
-    /// </summary>
-    public SubjectResponse? Subject { get; set; }
 
     /// <summary>
     /// Enrollments for this course if expanded.

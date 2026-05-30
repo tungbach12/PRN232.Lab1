@@ -13,20 +13,14 @@ public class SubjectRepository : ISubjectRepository
         _context = context;
     }
 
-    public IQueryable<Subject> Query(bool includeCourses)
+    public IQueryable<Subject> Query()
     {
-        var query = _context.Subjects.AsNoTracking();
-        if (includeCourses)
-        {
-            query = query.Include(s => s.Courses);
-        }
-
-        return query;
+        return _context.Subjects.AsNoTracking();
     }
 
-    public async Task<Subject?> GetByIdAsync(int id, bool includeCourses)
+    public async Task<Subject?> GetByIdAsync(int id)
     {
-        var query = Query(includeCourses);
+        var query = Query();
         return await query.FirstOrDefaultAsync(s => s.SubjectId == id);
     }
 

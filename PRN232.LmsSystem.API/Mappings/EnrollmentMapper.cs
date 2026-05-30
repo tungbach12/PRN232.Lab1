@@ -49,8 +49,7 @@ public static class EnrollmentMapper
             {
                 CourseId = model.Course.CourseId,
                 CourseName = model.Course.CourseName,
-                SemesterId = model.Course.SemesterId,
-                SubjectId = model.Course.SubjectId
+                SemesterId = model.Course.SemesterId
             }
         };
     }

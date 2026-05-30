@@ -6,7 +6,5 @@ public class Course
     public string CourseName { get; set; } = string.Empty;
     public int SemesterId { get; set; }
     public Semester? Semester { get; set; }
-    public int SubjectId { get; set; }
-    public Subject? Subject { get; set; }
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
 }

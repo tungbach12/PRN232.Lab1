@@ -103,8 +103,7 @@ public class SemesterService : ISemesterService
                 {
                     CourseId = c.CourseId,
                     CourseName = c.CourseName,
-                    SemesterId = c.SemesterId,
-                    SubjectId = c.SubjectId
+                    SemesterId = c.SemesterId
                 }).ToList()
         };
     }

@@ -145,8 +145,7 @@ public class StudentService : IStudentService
                     {
                         CourseId = e.Course.CourseId,
                         CourseName = e.Course.CourseName,
-                        SemesterId = e.Course.SemesterId,
-                        SubjectId = e.Course.SubjectId
+                        SemesterId = e.Course.SemesterId
                     },
                     EnrollDate = e.EnrollDate,
                     Status = e.Status
@@ -174,8 +173,7 @@ public class StudentService : IStudentService
             {
                 CourseId = enrollment.Course.CourseId,
                 CourseName = enrollment.Course.CourseName,
-                SemesterId = enrollment.Course.SemesterId,
-                SubjectId = enrollment.Course.SubjectId
+                SemesterId = enrollment.Course.SemesterId
             }
         };
     }

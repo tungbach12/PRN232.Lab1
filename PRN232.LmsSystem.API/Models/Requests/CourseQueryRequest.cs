@@ -15,7 +15,7 @@ public class CourseQueryRequest
     /// <summary>
     /// Dynamic multi-property sorting expression. Comma-separated properties.
     /// Prefix a property with '-' for descending order. Default is ascending.
-    /// Valid properties (Case-Insensitive): courseId, courseName, semesterId, subjectId.
+    /// Valid properties (Case-Insensitive): courseId, courseName, semesterId.
     /// Example: "courseName,-semesterId"
     /// </summary>
     /// <example>courseName</example>
@@ -38,7 +38,7 @@ public class CourseQueryRequest
     /// <summary>
     /// Comma-separated list of properties to include in the shaped JSON response (Data Shaping).
     /// Leaving it empty returns all non-navigation properties by default.
-    /// Valid shapeable fields (Case-Insensitive): courseId, courseName, semesterId, subjectId, semester (if expanded), subject (if expanded), enrollments (if expanded).
+    /// Valid shapeable fields (Case-Insensitive): courseId, courseName, semesterId, semester (if expanded), enrollments (if expanded).
     /// Example: "courseId,courseName"
     /// </summary>
     /// <example>courseId,courseName</example>
@@ -48,11 +48,10 @@ public class CourseQueryRequest
     /// Comma-separated list of related navigation properties or entities to eager-load and include in the payload.
     /// Supported options (Case-Insensitive):
     /// - "semester": Associated semester details (semesterName, startDate, endDate).
-    /// - "subject": Associated subject details (subjectCode, subjectName, credit).
     /// - "enrollments": Enrollment records for students in this course.
-    /// Example: "semester,subject"
+    /// Example: "semester,enrollments"
     /// </summary>
-    /// <example>semester,subject</example>
+    /// <example>semester,enrollments</example>
     public string? Expand { get; set; }
 }
 

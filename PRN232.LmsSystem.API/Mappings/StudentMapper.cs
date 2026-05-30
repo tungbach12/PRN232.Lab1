@@ -39,8 +39,7 @@ public static class StudentMapper
                 {
                     CourseId = e.Course.CourseId,
                     CourseName = e.Course.CourseName,
-                    SemesterId = e.Course.SemesterId,
-                    SubjectId = e.Course.SubjectId
+                    SemesterId = e.Course.SemesterId
                 },
                 EnrollDate = e.EnrollDate,
                 Status = e.Status

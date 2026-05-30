@@ -19,10 +19,4 @@ public class CourseRequest
     /// </summary>
     [Required]
     public int SemesterId { get; set; }
-
-    /// <summary>
-    /// The ID of the subject this course belongs to.
-    /// </summary>
-    [Required]
-    public int SubjectId { get; set; }
 }

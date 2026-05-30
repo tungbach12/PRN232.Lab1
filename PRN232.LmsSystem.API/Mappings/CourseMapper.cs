@@ -15,7 +15,6 @@ public static class CourseMapper
             Page = request.Page,
             Size = request.Size,
             IncludeSemester = HasExpand(request.Expand, "semester"),
-            IncludeSubject = HasExpand(request.Expand, "subject"),
             IncludeEnrollments = HasExpand(request.Expand, "enrollments")
         };
     }
@@ -25,10 +24,6 @@ public static class CourseMapper
         return HasExpand(expand, "semester");
     }
 
-    public static bool IncludeSubject(string? expand)
-    {
-        return HasExpand(expand, "subject");
-    }
 
     public static bool IncludeEnrollments(string? expand)
     {
@@ -42,20 +37,12 @@ public static class CourseMapper
             CourseId = model.CourseId,
             CourseName = model.CourseName,
             SemesterId = model.SemesterId,
-            SubjectId = model.SubjectId,
             Semester = model.Semester is null ? null : new SemesterResponse
             {
                 SemesterId = model.Semester.SemesterId,
                 SemesterName = model.Semester.SemesterName,
                 StartDate = model.Semester.StartDate,
                 EndDate = model.Semester.EndDate
-            },
-            Subject = model.Subject is null ? null : new SubjectResponse
-            {
-                SubjectId = model.Subject.SubjectId,
-                SubjectCode = model.Subject.SubjectCode,
-                SubjectName = model.Subject.SubjectName,
-                Credit = model.Subject.Credit
             },
             Enrollments = model.Enrollments?.Select(e => new EnrollmentResponse
             {
@@ -103,20 +90,12 @@ public static class CourseMapper
             shaped["semesterId"] = response.SemesterId;
         }
 
-        if (selected.Contains("subjectid"))
-        {
-            shaped["subjectId"] = response.SubjectId;
-        }
 
         if (selected.Contains("semester"))
         {
             shaped["semester"] = response.Semester;
         }
 
-        if (selected.Contains("subject"))
-        {
-            shaped["subject"] = response.Subject;
-        }
 
         if (selected.Contains("enrollments"))
         {

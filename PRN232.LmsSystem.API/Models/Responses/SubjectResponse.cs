@@ -25,8 +25,4 @@ public class SubjectResponse
     /// </summary>
     public int Credit { get; set; }
 
-    /// <summary>
-    /// List of courses for the subject if expanded.
-    /// </summary>
-    public List<CourseResponse>? Courses { get; set; }
 }

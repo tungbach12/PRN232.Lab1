@@ -68,7 +68,7 @@ public class SubjectsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<object>>> GetSubject(int id, [FromQuery] string? expand, [FromQuery] string? fields)
     {
-        var subject = await _service.GetSubjectByIdAsync(id, SubjectMapper.IncludeCourses(expand));
+        var subject = await _service.GetSubjectByIdAsync(id);
         if (subject is null)
         {
             return NotFound(new ApiResponse<object>

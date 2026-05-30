@@ -13,17 +13,12 @@ public class CourseRepository : ICourseRepository
         _context = context;
     }
 
-    public IQueryable<Course> Query(bool includeSemester, bool includeSubject, bool includeEnrollments)
+    public IQueryable<Course> Query(bool includeSemester, bool includeEnrollments)
     {
         var query = _context.Courses.AsNoTracking();
         if (includeSemester)
         {
             query = query.Include(c => c.Semester);
-        }
-
-        if (includeSubject)
-        {
-            query = query.Include(c => c.Subject);
         }
 
         if (includeEnrollments)
@@ -36,9 +31,9 @@ public class CourseRepository : ICourseRepository
         return query;
     }
 
-    public async Task<Course?> GetByIdAsync(int id, bool includeSemester, bool includeSubject, bool includeEnrollments)
+    public async Task<Course?> GetByIdAsync(int id, bool includeSemester, bool includeEnrollments)
     {
-        var query = Query(includeSemester, includeSubject, includeEnrollments);
+        var query = Query(includeSemester, includeEnrollments);
         return await query.FirstOrDefaultAsync(c => c.CourseId == id);
     }
 
